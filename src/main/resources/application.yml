@@ -1,0 +1,7 @@
+http:
+  connections:
+    maxTotal: 32
+    defaultMaxPerRoute: 8
+concurrency:
+  maxPoolSize: 32
+  corePoolSize: 8
