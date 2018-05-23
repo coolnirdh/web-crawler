@@ -2,6 +2,7 @@ http:
   connections:
     maxTotal: 32
     defaultMaxPerRoute: 8
+    evictionDelayInMillis: 5000
+    idleTimeOutInSeconds: 30
 concurrency:
-  maxPoolSize: 32
   corePoolSize: 8

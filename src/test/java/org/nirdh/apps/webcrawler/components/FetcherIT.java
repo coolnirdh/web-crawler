@@ -3,15 +3,17 @@ package org.nirdh.apps.webcrawler.components;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nirdh.apps.webcrawler.exceptions.FetcherException;
+import org.nirdh.apps.webcrawler.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -28,7 +30,7 @@ public class FetcherIT {
     private Fetcher fetcher;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private TaskExecutor taskExecutor;
 
     @Test
     public void consecutiveRequestsAreSlowestWithoutConnectionPooling() throws Exception {
@@ -59,18 +61,16 @@ public class FetcherIT {
     @Test
     public void consecutiveRequestsPerformFastestWithConnectionPoolingAndThreading() throws Exception {
         List<String> urlsToVisit = getListOfUrlsToVisit();
-        List<Thread> threads = new LinkedList<>();
-        for (String url : urlsToVisit) {
-            threads.add(new FetcherThread(applicationContext.getBean(Fetcher.class), url));
-        }
+        ThreadPoolTaskExecutor taskExecutor = (ThreadPoolTaskExecutor) this.taskExecutor;
 
         long startTimeInMillis = System.currentTimeMillis();
-        for (Thread thread : threads) {
-            thread.start();
+        List<Future<Page>> futures = new LinkedList<>();
+        for (String url : urlsToVisit) {
+            futures.add(taskExecutor.submit(() -> fetcher.fetchPage(url)));
         }
 
-        for (Thread thread : threads) {
-            thread.join();
+        for (Future<Page> future : futures) {
+            future.get();
         }
         long timeTakenInMillis = System.currentTimeMillis() - startTimeInMillis;
         System.out.println("Time taken: " + timeTakenInMillis);
@@ -89,24 +89,5 @@ public class FetcherIT {
                 "https://www.google.com/search?q=mongo",
                 "https://www.google.com/search?q=maven"
         );
-    }
-}
-
-class FetcherThread extends Thread {
-
-    private Fetcher fetcher;
-    private final String url;
-
-    FetcherThread(Fetcher fetcher, String url) {
-        this.fetcher = fetcher;
-        this.url = url;
-    }
-
-    public void run(){
-        try {
-            fetcher.fetchPage(url);
-        } catch (FetcherException e) {
-            e.printStackTrace();
-        }
     }
 }

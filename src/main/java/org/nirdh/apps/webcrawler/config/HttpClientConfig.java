@@ -7,6 +7,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * Creates injectable beans for HTTP Client connection management.
@@ -21,6 +22,7 @@ public class HttpClientConfig {
     private int httpConnectionsDefaultMaxPerRoute;
 
     @Bean(destroyMethod = "shutdown")
+    @Profile("!mock")
     public HttpClientConnectionManager httpClientConnectionManager() {
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(httpConnectionsMaxTotal);
