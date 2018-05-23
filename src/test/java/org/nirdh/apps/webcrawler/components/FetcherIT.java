@@ -37,7 +37,7 @@ public class FetcherIT {
 
         long startTimeInMillis = System.currentTimeMillis();
         for (String url : urlsToVisit) {
-            slowFetcher.fetchPageContentFrom(url);
+            slowFetcher.fetchPage(url);
         }
         long timeTakenInMillis = System.currentTimeMillis() - startTimeInMillis;
         System.out.println("Time taken: " + timeTakenInMillis);
@@ -49,7 +49,7 @@ public class FetcherIT {
         List<String> urlsToVisit = getListOfUrlsToVisit();
         long startTimeInMillis = System.currentTimeMillis();
         for (String url : urlsToVisit) {
-            fetcher.fetchPageContentFrom(url);
+            fetcher.fetchPage(url);
         }
         long timeTakenInMillis = System.currentTimeMillis() - startTimeInMillis;
         System.out.println("Time taken: " + timeTakenInMillis);
@@ -104,7 +104,7 @@ class FetcherThread extends Thread {
 
     public void run(){
         try {
-            fetcher.fetchPageContentFrom(url);
+            fetcher.fetchPage(url);
         } catch (FetcherException e) {
             e.printStackTrace();
         }
