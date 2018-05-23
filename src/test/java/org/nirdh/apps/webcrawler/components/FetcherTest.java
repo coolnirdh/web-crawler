@@ -1,6 +1,5 @@
 package org.nirdh.apps.webcrawler.components;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,6 +7,7 @@ import org.junit.rules.ExpectedException;
 import org.nirdh.apps.webcrawler.exceptions.FetcherException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 
 /**
@@ -28,14 +28,14 @@ public class FetcherTest {
     @Test
     public void doesNotFetchFromNullUrl() throws Exception {
         thrown.expect(FetcherException.class);
-        thrown.expectMessage(Matchers.containsString("[null]"));
+        thrown.expectMessage(containsString("[null]"));
         fetcher.fetchPageContentFrom(null);
     }
 
     @Test
     public void doesNotFetchFromEmptyUrl() throws Exception {
         thrown.expect(FetcherException.class);
-        thrown.expectMessage(Matchers.containsString("[]"));
+        thrown.expectMessage(containsString("[]"));
         fetcher.fetchPageContentFrom("");
     }
 
@@ -43,7 +43,7 @@ public class FetcherTest {
     public void doesNotFetchFromMalformedUrl() throws Exception {
         String urlSupplied = "blah";
         thrown.expect(FetcherException.class);
-        thrown.expectMessage(Matchers.containsString(urlSupplied));
+        thrown.expectMessage(containsString(urlSupplied));
         fetcher.fetchPageContentFrom(urlSupplied);
     }
 
@@ -51,7 +51,7 @@ public class FetcherTest {
     public void doesNotFetchFromUrlWithInvalidDNS() throws Exception {
         String urlSupplied = "http://subdomain.google.com:8080/path";
         thrown.expect(FetcherException.class);
-        thrown.expectMessage(Matchers.containsString(urlSupplied));
+        thrown.expectMessage(containsString(urlSupplied));
         fetcher.fetchPageContentFrom(urlSupplied);
     }
 
@@ -59,7 +59,7 @@ public class FetcherTest {
     public void doesNotFetchFromNonExistentPage() throws Exception {
         String urlSupplied = "https://google.com/nonexistentpage";
         thrown.expect(FetcherException.class);
-        thrown.expectMessage(Matchers.containsString(urlSupplied));
+        thrown.expectMessage(containsString(urlSupplied));
         fetcher.fetchPageContentFrom("https://google.com/nonexistentpage");
     }
 
