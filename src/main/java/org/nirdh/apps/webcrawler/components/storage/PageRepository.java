@@ -25,4 +25,12 @@ public class PageRepository {
     public Page findByUrl(String url) {
         return pagesByUrl.get(url);
     }
+
+    public void markAsScheduledForCrawl(String url) {
+        pagesByUrl.put(url, new Page(url, null, null));
+    }
+
+    public boolean isCrawledOrScheduledForCrawl(String url) {
+        return pagesByUrl.containsKey(url);
+    }
 }

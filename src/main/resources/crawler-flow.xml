@@ -27,10 +27,6 @@
     </channel>
     <channel id="logger"/>
 
-    <int-stream:stdin-channel-adapter id="adapterWithDefaultCharset" channel="discoveredUrls">
-        <poller id="poller" fixed-delay="1000" />
-    </int-stream:stdin-channel-adapter>
-
     <service-activator ref="fetcher" method="fetchFrom" input-channel="discoveredUrls" output-channel="cachedResponses"/>
     <service-activator ref="parser" method="parse" input-channel="cachedResponses" output-channel="pages"/>
     <splitter ref="crawlFrontier" method="spawnRequests" input-channel="pages" output-channel="crawlRequests"/>

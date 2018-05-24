@@ -8,6 +8,7 @@ import java.util.Collections;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
 /**
@@ -31,7 +32,7 @@ public class PageRepositoryTest {
     }
 
     @Test
-    public void retrievingByUrlThatIsntStoreReturnsNull() throws Exception {
+    public void retrievingByUrlThatIsntStoredReturnsNull() throws Exception {
         assertThat(pageRepository.findByUrl("https://www.google.com"), is(nullValue()));
     }
 
@@ -45,5 +46,23 @@ public class PageRepositoryTest {
         Page newerPage = new Page(url, "New", Collections.emptyList());
         pageRepository.store(newerPage);
         assertThat(pageRepository.findByUrl("https://www.google.com"), is(newerPage));
+    }
+
+    @Test
+    public void markingPageAsScheduledForCrawlRemovesPreviousPageStored() throws Exception {
+        String url = "https://www.google.com";
+        Page olderPage = new Page(url, "Old", Collections.emptyList());
+        pageRepository.store(olderPage);
+        assertThat(pageRepository.findByUrl(url), is(olderPage));
+
+        pageRepository.markAsScheduledForCrawl(url);
+        assertThat(pageRepository.findByUrl(url), not(olderPage));
+        assertThat(pageRepository.isCrawledOrScheduledForCrawl(url), is(true));
+    }
+
+    @Test
+    public void aUrlNotKnownToPageRepositoryIsNotCrawledOrScheduledForCrawl() throws Exception {
+        String url = "https://www.google.com";
+        assertThat(pageRepository.isCrawledOrScheduledForCrawl(url), is(false));
     }
 }
