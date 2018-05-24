@@ -11,7 +11,7 @@
 2. Usable: Must allow users across the world to submit requests for crawling a domain or specific page via some URL
 3. Asynchronous: Must not wait until end of crawling to print sitemap, user must be able to see crawling progress (number of links discovered and crawled) and request partial sitemap
 4. Robust: Should not have single point of failures
-5. Scalable and Distributed: Must be able to crawl sites like Wikipedia or Twitter
+5. Scalable and Distributed: Must be able to crawl sites like Wikipedia or GitHub
 6. Polite: Introduces itself to sites as a crawler, respects disallow and crawl-delay policies using robots.txt
 7. Content Indexing: Must be able to extract and store relevant content by scraping pages
 8. Automatic Reindexing: Must regularly reindex known pages based on calculated page importance, and changeFrequency / priority specifications found in sitemap.xml

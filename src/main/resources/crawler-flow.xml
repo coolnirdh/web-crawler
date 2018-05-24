@@ -19,12 +19,12 @@
         <dispatcher task-executor="taskExecutor"/>
     </channel>
     <channel id="cachedResponses"/>
-    <channel id="pages"/>
-    <channel id="crawlRequests">
+    <channel id="pages">
         <interceptors>
             <wire-tap channel="logger"/>
         </interceptors>
     </channel>
+    <channel id="crawlRequests"/>
     <channel id="logger"/>
 
     <service-activator ref="fetcher" method="fetchFrom" input-channel="discoveredUrls" output-channel="cachedResponses"/>
@@ -32,6 +32,6 @@
     <splitter ref="crawlFrontier" method="spawnRequests" input-channel="pages" output-channel="crawlRequests"/>
     <transformer expression="payload.getUrlToCrawl()" input-channel="crawlRequests" output-channel="discoveredUrls"/>
 
-    <logging-channel-adapter order="2" expression="payload.getReferrerUrl() + ' -> ' + payload.getUrlToCrawl()" channel="logger"/>
+    <logging-channel-adapter order="2" channel="logger"/>
 
 </beans:beans>

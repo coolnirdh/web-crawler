@@ -15,8 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by Nirdh on 24-05-2018.
@@ -42,10 +41,17 @@ public class CrawlFrontierTest {
     }
 
     @Test
-    public void marksLinksAsScheduledForCrawl() throws Exception {
+    public void storesLinksToBeCrawledToRepository() throws Exception {
         String link = "https://www.google.com/test";
         crawlFrontier.spawnRequests(new Page("https://www.google.com", "title", Collections.singletonList(link)));
-        verify(pageRepository).markAsScheduledForCrawl(link);
+        verify(pageRepository).store(link);
+    }
+
+    @Test
+    public void doesNotStoreLinksThatNeedNotBeCrawled() throws Exception {
+        String link = "mailto:me@google.com";
+        crawlFrontier.spawnRequests(new Page("https://www.google.com", "title", Collections.singletonList(link)));
+        verify(pageRepository, never()).store(link);
     }
 
     @Test
@@ -79,8 +85,8 @@ public class CrawlFrontierTest {
     }
 
     @Test
-    public void doesNotSpawnCrawlRequestForLinksAlreadyCrawledOrScheduledForCrawl() throws Exception {
-        doReturn(true).when(pageRepository).isCrawledOrScheduledForCrawl("https://www.google.com:8080/test");
+    public void doesNotSpawnCrawlRequestForLinksAlreadyInRepository() throws Exception {
+        doReturn(true).when(pageRepository).contains("https://www.google.com:8080/test");
         Page page = new Page("https://www.google.com", "title", Collections.singletonList("https://www.google.com:8080/test"));
         assertThat(crawlFrontier.spawnRequests(page), is(empty()));
     }

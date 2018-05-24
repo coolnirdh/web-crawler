@@ -20,7 +20,7 @@ public class Parser {
         Validate.notNull(cachedResponse, "cachedResponse must not be null");
         Document document = Jsoup.parse(cachedResponse.getContent(), cachedResponse.getUrl());
         List<String> outgoingLinks = document.select("a[href]").stream()
-                .map(anchorTag -> anchorTag.attr("abs:href").replaceFirst("\\?|\\/$", ""))
+                .map(anchorTag -> anchorTag.attr("abs:href").replaceFirst("\\?$|\\/$|\\#$", ""))
                 .distinct()
                 .collect(Collectors.toList());
         return new Page(cachedResponse.getUrl(), document.title(), outgoingLinks);

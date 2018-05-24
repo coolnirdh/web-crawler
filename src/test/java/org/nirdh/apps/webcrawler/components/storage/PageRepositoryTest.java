@@ -26,13 +26,21 @@ public class PageRepositoryTest {
     @Test
     public void storedPageCanBeRetrievedByUrl() throws Exception {
         String url = "https://www.google.com";
-        Page page = new Page(url, "", Collections.emptyList());
+        Page page = new Page(url, "Google", Collections.emptyList());
         pageRepository.store(page);
         assertThat(pageRepository.findByUrl(url), is(page));
     }
 
     @Test
-    public void retrievingByUrlThatIsntStoredReturnsNull() throws Exception {
+    public void retrievingStoredLinksGivesEmptyPage() throws Exception {
+        String url = "https://www.google.com";
+        pageRepository.store(url);
+        Page page = new Page(url, null, null);
+        assertThat(pageRepository.findByUrl(url), is(page));
+    }
+
+    @Test
+    public void retrievingByUrlThatWasNeverStoredReturnsNull() throws Exception {
         assertThat(pageRepository.findByUrl("https://www.google.com"), is(nullValue()));
     }
 
@@ -49,20 +57,34 @@ public class PageRepositoryTest {
     }
 
     @Test
-    public void markingPageAsScheduledForCrawlRemovesPreviousPageStored() throws Exception {
+    public void newlyStoredLinkOverritesValueOfOlderPageWithSameUrl() throws Exception {
         String url = "https://www.google.com";
         Page olderPage = new Page(url, "Old", Collections.emptyList());
         pageRepository.store(olderPage);
         assertThat(pageRepository.findByUrl(url), is(olderPage));
 
-        pageRepository.markAsScheduledForCrawl(url);
+        pageRepository.store(url);
         assertThat(pageRepository.findByUrl(url), not(olderPage));
-        assertThat(pageRepository.isCrawledOrScheduledForCrawl(url), is(true));
     }
 
     @Test
-    public void aUrlNotKnownToPageRepositoryIsNotCrawledOrScheduledForCrawl() throws Exception {
+    public void doesNotContainUrlThatIsNotStored() throws Exception {
         String url = "https://www.google.com";
-        assertThat(pageRepository.isCrawledOrScheduledForCrawl(url), is(false));
+        assertThat(pageRepository.contains(url), is(false));
+    }
+
+    @Test
+    public void containsUrlOfStoredPage() throws Exception {
+        String url = "https://www.google.com";
+        Page page = new Page(url, "Google", Collections.emptyList());
+        pageRepository.store(page);
+        assertThat(pageRepository.contains(url), is(true));
+    }
+
+    @Test
+    public void containsUrlOfStoredLink() throws Exception {
+        String url = "https://www.google.com";
+        pageRepository.store(url);
+        assertThat(pageRepository.contains(url), is(true));
     }
 }

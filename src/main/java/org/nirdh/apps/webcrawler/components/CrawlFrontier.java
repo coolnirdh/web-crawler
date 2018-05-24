@@ -28,18 +28,18 @@ public class CrawlFrontier {
         pageRepository.store(page);
         String domain = URI.create(page.getUrl()).getHost();
         return page.getOutgoingLinks().stream()
-                .filter(link -> isNonEmpty(link)
-                        && !link.startsWith("mailto:")
-                        && URI.create(link).getHost().endsWith(domain)
-                        && !pageRepository.isCrawledOrScheduledForCrawl(link))
+                .filter(this::isNotEmpty)
+                .filter(link -> !link.startsWith("mailto:"))
+                .filter(link -> URI.create(link).getHost().endsWith(domain))
                 .map(link -> link.replaceFirst("#.*$", ""))
                 .distinct()
-                .peek(pageRepository::markAsScheduledForCrawl)
+                .filter(link -> !pageRepository.contains(link))
+                .peek(pageRepository::store)
                 .map(link -> new CrawlRequest(page.getUrl(), link))
                 .collect(Collectors.toList());
     }
 
-    private boolean isNonEmpty(String link) {
+    private boolean isNotEmpty(String link) {
         return link != null && link.trim().length() > 0;
     }
 }

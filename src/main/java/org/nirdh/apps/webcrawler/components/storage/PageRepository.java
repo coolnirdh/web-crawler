@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Minimalistic version of a fast data store.
+ * Minimalistic version of a fast data store that persists information extracted after parsing a Page.
  */
 @Repository
 public class PageRepository {
@@ -22,15 +22,15 @@ public class PageRepository {
         pagesByUrl.put(page.getUrl(), page);
     }
 
+    public void store(String url) {
+        pagesByUrl.put(url, new Page(url, null, null));
+    }
+
     public Page findByUrl(String url) {
         return pagesByUrl.get(url);
     }
 
-    public void markAsScheduledForCrawl(String url) {
-        pagesByUrl.put(url, new Page(url, null, null));
-    }
-
-    public boolean isCrawledOrScheduledForCrawl(String url) {
+    public boolean contains(String url) {
         return pagesByUrl.containsKey(url);
     }
 }

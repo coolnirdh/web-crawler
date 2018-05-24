@@ -123,7 +123,7 @@ public class ParserTest {
 
     @Test
     public void duplicateLinksAreOnlyPreservedOnceInPage() throws Exception {
-        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://www.google.com/test").withLink("test").withLink("/test").withLink("test?").withLink("test/").build()));
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://www.google.com/test").withLink("test").withLink("/test").withLink("test?").withLink("test/").withLink("test#").build()));
         assertThat(page.getOutgoingLinks(), contains("https://www.google.com/test"));
     }
 }
