@@ -1,14 +1,12 @@
 package org.nirdh.apps.webcrawler.components;
 
+import org.apache.http.impl.client.HttpClients;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.nirdh.apps.webcrawler.domain.CachedResponse;
 import org.nirdh.apps.webcrawler.exceptions.FetcherException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -16,15 +14,17 @@ import static org.hamcrest.Matchers.*;
 /**
  * Created by Nirdh on 22-05-2018.
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
 public class FetcherTest {
 
-    @Autowired
     private Fetcher fetcher;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @Before
+    public void setUp() throws Exception {
+        fetcher = new Fetcher(HttpClients.createDefault());
+    }
 
     @Test
     public void doesNotFetchFromNullUrl() throws Exception {
