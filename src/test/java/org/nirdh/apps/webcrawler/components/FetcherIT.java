@@ -3,7 +3,7 @@ package org.nirdh.apps.webcrawler.components;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nirdh.apps.webcrawler.domain.Page;
+import org.nirdh.apps.webcrawler.domain.CachedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.task.TaskExecutor;
@@ -39,7 +39,7 @@ public class FetcherIT {
 
         long startTimeInMillis = System.currentTimeMillis();
         for (String url : urlsToVisit) {
-            slowFetcher.fetchPage(url);
+            slowFetcher.fetchFrom(url);
         }
         long timeTakenInMillis = System.currentTimeMillis() - startTimeInMillis;
         System.out.println("Time taken: " + timeTakenInMillis);
@@ -51,7 +51,7 @@ public class FetcherIT {
         List<String> urlsToVisit = getListOfUrlsToVisit();
         long startTimeInMillis = System.currentTimeMillis();
         for (String url : urlsToVisit) {
-            fetcher.fetchPage(url);
+            fetcher.fetchFrom(url);
         }
         long timeTakenInMillis = System.currentTimeMillis() - startTimeInMillis;
         System.out.println("Time taken: " + timeTakenInMillis);
@@ -64,12 +64,12 @@ public class FetcherIT {
         ThreadPoolTaskExecutor taskExecutor = (ThreadPoolTaskExecutor) this.taskExecutor;
 
         long startTimeInMillis = System.currentTimeMillis();
-        List<Future<Page>> futures = new LinkedList<>();
+        List<Future<CachedResponse>> futures = new LinkedList<>();
         for (String url : urlsToVisit) {
-            futures.add(taskExecutor.submit(() -> fetcher.fetchPage(url)));
+            futures.add(taskExecutor.submit(() -> fetcher.fetchFrom(url)));
         }
 
-        for (Future<Page> future : futures) {
+        for (Future<CachedResponse> future : futures) {
             future.get();
         }
         long timeTakenInMillis = System.currentTimeMillis() - startTimeInMillis;

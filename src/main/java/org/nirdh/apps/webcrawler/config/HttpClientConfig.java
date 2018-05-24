@@ -21,8 +21,8 @@ public class HttpClientConfig {
     @Value("${http.connections.defaultMaxPerRoute}")
     private int httpConnectionsDefaultMaxPerRoute;
 
-    @Bean(destroyMethod = "shutdown")
     @Profile("!mock")
+    @Bean(destroyMethod = "shutdown")
     public HttpClientConnectionManager httpClientConnectionManager() {
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(httpConnectionsMaxTotal);

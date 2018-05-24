@@ -2,12 +2,14 @@ package org.nirdh.apps.webcrawler.domain;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
- * Represents a page on the internet.
+ * Represents the information extracted from parsing the contents of a web document.
  */
 @Data
 public class Page {
     private final String url;
-    private final int statusCode;
-    private final String content;
+    private final String title;
+    private final List<String> outgoingLinks;
 }

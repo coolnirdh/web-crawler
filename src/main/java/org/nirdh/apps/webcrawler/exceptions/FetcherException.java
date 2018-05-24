@@ -1,7 +1,7 @@
 package org.nirdh.apps.webcrawler.exceptions;
 
 /**
- * Created by Nirdh on 22-05-2018.
+ * Makes sure that we always capture the faulting URL.
  */
 public class FetcherException extends Exception {
     public FetcherException(String url, Throwable cause) {

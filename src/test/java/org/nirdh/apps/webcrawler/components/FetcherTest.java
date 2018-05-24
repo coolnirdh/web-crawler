@@ -4,7 +4,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.nirdh.apps.webcrawler.domain.Page;
+import org.nirdh.apps.webcrawler.domain.CachedResponse;
 import org.nirdh.apps.webcrawler.exceptions.FetcherException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,65 +27,65 @@ public class FetcherTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void doesNotFetchPageFromNullUrl() throws Exception {
+    public void doesNotFetchFromNullUrl() throws Exception {
         thrown.expect(FetcherException.class);
         thrown.expectMessage(containsString("[null]"));
-        fetcher.fetchPage(null);
+        fetcher.fetchFrom(null);
     }
 
     @Test
-    public void doesNotFetchPageFromEmptyUrl() throws Exception {
+    public void doesNotFetchFromEmptyUrl() throws Exception {
         thrown.expect(FetcherException.class);
         thrown.expectMessage(containsString("[]"));
-        fetcher.fetchPage("");
+        fetcher.fetchFrom("");
     }
 
     @Test
-    public void doesNotFetchPageFromMalformedUrl() throws Exception {
+    public void doesNotFetchFromMalformedUrl() throws Exception {
         String urlSupplied = "blah";
         thrown.expect(FetcherException.class);
         thrown.expectMessage(containsString(urlSupplied));
-        fetcher.fetchPage(urlSupplied);
+        fetcher.fetchFrom(urlSupplied);
     }
 
     @Test
-    public void doesNotFetchPageFromUrlWithInvalidDNS() throws Exception {
+    public void doesNotFetchFromUrlWithInvalidDNS() throws Exception {
         String urlSupplied = "http://subdomain.google.com:8080/path";
         thrown.expect(FetcherException.class);
         thrown.expectMessage(containsString(urlSupplied));
-        fetcher.fetchPage(urlSupplied);
+        fetcher.fetchFrom(urlSupplied);
     }
 
     @Test
-    public void doesNotFetchPageFromUrlPointingToMedia() throws Exception {
+    public void doesNotFetchFromUrlPointingToMedia() throws Exception {
         String urlSupplied = "https://www.google.co.in/images/branding/product/ico/googleg_lodp.ico";
         thrown.expect(FetcherException.class);
         thrown.expectMessage(containsString(urlSupplied));
-        fetcher.fetchPage(urlSupplied);
+        fetcher.fetchFrom(urlSupplied);
     }
 
     @Test
-    public void statusCodeIs404InPageFetchedFromNonExistentUrl() throws Exception {
-        Page page = fetcher.fetchPage("https://google.com/nonexistentpage");
-        assertThat(page.getStatusCode(), comparesEqualTo(404));
+    public void statusCodeIs404InCachedResponseFetchedFromNonExistentUrl() throws Exception {
+        CachedResponse cachedResponse = fetcher.fetchFrom("https://google.com/nonexistentpage");
+        assertThat(cachedResponse.getStatusCode(), comparesEqualTo(404));
     }
 
     @Test
-    public void statusCodeIs200InPageFetchedFromValidUrl() throws Exception {
-        Page page = fetcher.fetchPage("https://google.com/");
-        assertThat(page.getStatusCode(), comparesEqualTo(200));
+    public void statusCodeIs200InCachedResponseFetchedFromValidUrl() throws Exception {
+        CachedResponse cachedResponse = fetcher.fetchFrom("https://google.com/");
+        assertThat(cachedResponse.getStatusCode(), comparesEqualTo(200));
     }
 
     @Test
-    public void urlInPageIsSameAsUrlSuppliedToFetcher() throws Exception {
+    public void urlInCachedResponseIsSameAsUrlSuppliedToFetcher() throws Exception {
         String suppliedUrl = "https://google.com/";
-        Page page = fetcher.fetchPage(suppliedUrl);
-        assertThat(page.getUrl(), is(suppliedUrl));
+        CachedResponse cachedResponse = fetcher.fetchFrom(suppliedUrl);
+        assertThat(cachedResponse.getUrl(), is(suppliedUrl));
     }
 
     @Test
-    public void contentInPageRepresentsHtmlFetchedFromUrl() throws Exception {
-        Page page = fetcher.fetchPage("https://google.com/nonexistentpage");
-        assertThat(page.getContent(), containsString("<title>"));
+    public void contentInCachedResponseRepresentsHtmlFetchedFromUrl() throws Exception {
+        CachedResponse cachedResponse = fetcher.fetchFrom("https://google.com/nonexistentpage");
+        assertThat(cachedResponse.getContent(), containsString("<title>"));
     }
 }
