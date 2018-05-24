@@ -33,7 +33,11 @@ public class HtmlString {
         }
         html.append(title).append("</head><body><p>Some text");
         for (String link : links) {
-            html.append("<a style=\"\" href=\"").append(link).append("\">Click me</a>");
+            if (link == null) {
+                html.append("<a style=\"\" >Click me</a>");
+            } else {
+                html.append("<a style=\"\" href=\"").append(link).append("\">Click me</a>");
+            }
         }
         return html.append("</p></body></html>").toString();
     }

@@ -74,9 +74,21 @@ public class ParserTest {
     }
 
     @Test
-    public void linksToDifferentDomainAreNotPreservedInPage() throws Exception {
-        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("http://www.github.com/test").build()));
+    public void emptyLinksAreNotPreservedInPage() throws Exception {
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink(null).build()));
         assertThat(page.getOutgoingLinks(), is(empty()));
+    }
+
+    @Test
+    public void encodedLinksArePreservedInPage() throws Exception {
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("&#109;&#97;&#x69;&#108;&#116;&#111;&#x3a;&#x68;&#x65;&#108;&#112;&#64;&#x6d;&#111;&#x6e;&#122;&#111;&#46;&#x63;&#111;&#x6d;").build()));
+        assertThat(page.getOutgoingLinks(), contains("mailto:help@monzo.com"));
+    }
+
+    @Test
+    public void linksToDifferentDomainArePreservedInPage() throws Exception {
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("http://www.github.com/test").build()));
+        assertThat(page.getOutgoingLinks(), contains("http://www.github.com/test"));
     }
 
     @Test
@@ -86,9 +98,9 @@ public class ParserTest {
     }
 
     @Test
-    public void linksToParentDomainsAreNotPreservedInPage() throws Exception {
+    public void linksToParentDomainsArePreservedInPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://google.com/test").build()));
-        assertThat(page.getOutgoingLinks(), is(empty()));
+        assertThat(page.getOutgoingLinks(), contains("https://google.com/test"));
     }
 
     @Test
