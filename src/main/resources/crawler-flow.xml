@@ -36,6 +36,6 @@
     <splitter ref="crawlFrontier" method="spawnRequests" input-channel="pages" output-channel="crawlRequests"/>
     <transformer expression="payload.getUrlToCrawl()" input-channel="crawlRequests" output-channel="discoveredUrls"/>
 
-    <logging-channel-adapter order="2" channel="logger"/>
+    <logging-channel-adapter order="2" expression="payload.getReferrerUrl() + ' -> ' + payload.getUrlToCrawl()" channel="logger"/>
 
 </beans:beans>

@@ -1,9 +1,15 @@
 package org.nirdh.apps.webcrawler.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -11,6 +17,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Configuration
 public class WebCrawlerConfig {
+    private static final Log logger = LogFactory.getLog(WebCrawlerConfig.class);
 
     @Value("${concurrency.corePoolSize}")
     private int corePoolSize;
@@ -20,5 +27,18 @@ public class WebCrawlerConfig {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.setCorePoolSize(corePoolSize);
         return threadPoolTaskExecutor;
+    }
+
+    @Bean
+    public CommandLineRunner schedulingRunner(MessageChannel discoveredUrls) {
+        return new CommandLineRunner() {
+            public void run(String... args) throws Exception {
+                if (args.length == 0) {
+                    logger.error("Pass seed URL as command line argument");
+                    System.exit(1);
+                }
+                discoveredUrls.send(new GenericMessage<Object>(args[0]));
+            }
+        };
     }
 }
