@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/integration"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:int-stream="http://www.springframework.org/schema/integration/stream"
+             xmlns:context="http://www.springframework.org/schema/context"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/integration
+			http://www.springframework.org/schema/integration/spring-integration.xsd
+			http://www.springframework.org/schema/integration/stream
+			http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="org.nirdh.apps.webcrawler"/>
+
+    <channel id="discoveredUrls">
+        <dispatcher task-executor="taskExecutor"/>
+    </channel>
+    <channel id="cachedResponses"/>
+    <channel id="pages"/>
+    <channel id="crawlRequests">
+        <interceptors>
+            <wire-tap channel="logger"/>
+        </interceptors>
+    </channel>
+    <channel id="logger"/>
+
+    <int-stream:stdin-channel-adapter id="adapterWithDefaultCharset" channel="discoveredUrls">
+        <poller id="poller" fixed-delay="1000" />
+    </int-stream:stdin-channel-adapter>
+
+    <service-activator ref="fetcher" method="fetchFrom" input-channel="discoveredUrls" output-channel="cachedResponses"/>
+    <service-activator ref="parser" method="parse" input-channel="cachedResponses" output-channel="pages"/>
+    <splitter ref="crawlFrontier" method="spawnRequests" input-channel="pages" output-channel="crawlRequests"/>
+    <transformer expression="payload.getUrlToCrawl()" input-channel="crawlRequests" output-channel="discoveredUrls"/>
+
+    <logging-channel-adapter order="2" channel="logger"/>
+
+</beans:beans>
