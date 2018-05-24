@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
@@ -30,6 +31,7 @@ public class WebCrawlerConfig {
     }
 
     @Bean
+    @Profile("default")
     public CommandLineRunner schedulingRunner(MessageChannel discoveredUrls) {
         return new CommandLineRunner() {
             public void run(String... args) throws Exception {
