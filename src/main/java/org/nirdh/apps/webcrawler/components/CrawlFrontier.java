@@ -2,11 +2,11 @@ package org.nirdh.apps.webcrawler.components;
 
 import org.nirdh.apps.webcrawler.components.storage.PageRepository;
 import org.nirdh.apps.webcrawler.domain.CrawlRequest;
+import org.nirdh.apps.webcrawler.domain.Link;
 import org.nirdh.apps.webcrawler.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,20 +26,12 @@ public class CrawlFrontier {
 
     public List<CrawlRequest> spawnRequests(Page page) {
         pageRepository.store(page);
-        String domain = URI.create(page.getUrl()).getHost();
-        return page.getOutgoingLinks().stream()
-                .filter(this::isNotEmpty)
-                .filter(link -> !link.startsWith("mailto:"))
-                .filter(link -> URI.create(link).getHost().endsWith(domain))
-                .map(link -> link.replaceFirst("#.*$", ""))
+        return page.getInternalLinks().stream()
+                .map(Link::getUrlWithoutFragment)
                 .distinct()
-                .filter(link -> !pageRepository.contains(link))
+                .filter(url -> !pageRepository.contains(url))
                 .peek(pageRepository::store)
-                .map(link -> new CrawlRequest(page.getUrl(), link))
+                .map(url -> new CrawlRequest(url, page.getUrl()))
                 .collect(Collectors.toList());
-    }
-
-    private boolean isNotEmpty(String link) {
-        return link != null && link.trim().length() > 0;
     }
 }

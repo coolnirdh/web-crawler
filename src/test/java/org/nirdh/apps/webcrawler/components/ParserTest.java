@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.nirdh.apps.webcrawler.HtmlString;
 import org.nirdh.apps.webcrawler.domain.CachedResponse;
+import org.nirdh.apps.webcrawler.domain.Link;
 import org.nirdh.apps.webcrawler.domain.Page;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,20 +35,6 @@ public class ParserTest {
     }
 
     @Test
-    public void cannotParseIfContentInCachedResponseIsNull() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(containsString("String input must not be null"));
-        parser.parse(new CachedResponse("https://www.google.com", 200, null));
-    }
-
-    @Test
-    public void cannotParseIfUrlInCachedResponseIsNull() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(containsString("BaseURI must not be null"));
-        parser.parse(new CachedResponse(null, 200, new HtmlString().build()));
-    }
-
-    @Test
     public void urlInPageIsSameAsThatInCachedResponse() throws Exception {
         String url = "https://www.google.com";
         Page page = parser.parse(new CachedResponse(url, 200, new HtmlString().build()));
@@ -68,62 +55,69 @@ public class ParserTest {
     }
 
     @Test
-    public void outgoingLinksInPageAreAbsoluteEvenIfCachedResponseHadRelativeLinks() throws Exception {
+    public void relativeLinksAreAddedAsAbsoluteLinksToPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("test").build()));
-        assertThat(page.getOutgoingLinks(), contains("https://www.google.com/test"));
+        assertThat(page.getAllLinks(), contains(new Link("https://www.google.com/test", "Click me")));
     }
 
     @Test
-    public void emptyLinksAreNotPreservedInPage() throws Exception {
+    public void emptyLinksAreNotAddedToPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink(null).build()));
-        assertThat(page.getOutgoingLinks(), is(empty()));
+        assertThat(page.getAllLinks(), is(empty()));
     }
 
     @Test
-    public void encodedLinksArePreservedInPage() throws Exception {
+    public void encodedLinksAreAddedToPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("&#109;&#97;&#x69;&#108;&#116;&#111;&#x3a;&#x68;&#x65;&#108;&#112;&#64;&#x6d;&#111;&#x6e;&#122;&#111;&#46;&#x63;&#111;&#x6d;").build()));
-        assertThat(page.getOutgoingLinks(), contains("mailto:help@monzo.com"));
+        assertThat(page.getAllLinks(), contains(new Link("mailto:help@monzo.com", "Click me")));
     }
 
     @Test
-    public void linksToDifferentDomainArePreservedInPage() throws Exception {
+    public void linksToDifferentDomainAreAddedToPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("http://www.github.com/test").build()));
-        assertThat(page.getOutgoingLinks(), contains("http://www.github.com/test"));
+        assertThat(page.getAllLinks(), contains(new Link("http://www.github.com/test", "Click me")));
     }
 
     @Test
-    public void linksToSubDomainsArePreservedInPage() throws Exception {
+    public void linksToSubDomainsAreAddedToPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://google.com", 200, new HtmlString().withLink("https://www.google.com/test").build()));
-        assertThat(page.getOutgoingLinks(), contains("https://www.google.com/test"));
+        assertThat(page.getAllLinks(), contains(new Link("https://www.google.com/test", "Click me")));
     }
 
     @Test
-    public void linksToParentDomainsArePreservedInPage() throws Exception {
+    public void linksToParentDomainsAreAddedToPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://google.com/test").build()));
-        assertThat(page.getOutgoingLinks(), contains("https://google.com/test"));
+        assertThat(page.getAllLinks(), contains(new Link("https://google.com/test", "Click me")));
     }
 
     @Test
-    public void linksToSameDomainButDifferentProtocolArePreservedInPage() throws Exception {
-        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("http://www.google.com/test").build()));
-        assertThat(page.getOutgoingLinks(), contains("http://www.google.com/test"));
+    public void linksToSiblingDomainsAreAddedToPage() throws Exception {
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://mail.google.com/test").build()));
+        assertThat(page.getAllLinks(), contains(new Link("https://mail.google.com/test", "Click me")));
     }
 
     @Test
-    public void linksToSameDomainButDifferentPortArePreservedInPage() throws Exception {
-        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("http://www.google.com:8080/test").build()));
-        assertThat(page.getOutgoingLinks(), contains("http://www.google.com:8080/test"));
-    }
-
-    @Test
-    public void linksToSameBaseUrlArePreservedInPage() throws Exception {
+    public void linksToSameDomainAreAddedToPage() throws Exception {
         Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://www.google.com/test").build()));
-        assertThat(page.getOutgoingLinks(), contains("https://www.google.com/test"));
+        assertThat(page.getAllLinks(), contains(new Link("https://www.google.com/test", "Click me")));
     }
 
     @Test
-    public void duplicateLinksAreOnlyPreservedOnceInPage() throws Exception {
-        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://www.google.com/test").withLink("test").withLink("/test").withLink("test?").withLink("test/").withLink("test#").build()));
-        assertThat(page.getOutgoingLinks(), contains("https://www.google.com/test"));
+    public void linksToSameDomainButDifferentProtocolAreAddedToPage() throws Exception {
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("http://www.google.com/test").build()));
+        assertThat(page.getAllLinks(), contains(new Link("http://www.google.com/test", "Click me")));
+    }
+
+    @Test
+    public void linksToSameDomainButDifferentPortAreAddedToPage() throws Exception {
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://www.google.com:8080/test").build()));
+        assertThat(page.getAllLinks(), contains(new Link("https://www.google.com:8080/test", "Click me")));
+    }
+
+    @Test
+    public void duplicateLinksAreAddedToPageAsManyTimesAsTheyExist() throws Exception {
+        Page page = parser.parse(new CachedResponse("https://www.google.com", 200, new HtmlString().withLink("https://www.google.com/test").withLink("https://www.google.com/test").build()));
+        assertThat(page.getAllLinks(), contains(new Link("https://www.google.com/test", "Click me"),
+                new Link("https://www.google.com/test", "Click me")));
     }
 }

@@ -4,11 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.nirdh.apps.webcrawler.domain.Page;
 
-import java.util.Collections;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
 /**
@@ -26,16 +23,16 @@ public class PageRepositoryTest {
     @Test
     public void storedPageCanBeRetrievedByUrl() throws Exception {
         String url = "https://www.google.com";
-        Page page = new Page(url, "Google", Collections.emptyList());
+        Page page = new Page(url, "Google");
         pageRepository.store(page);
         assertThat(pageRepository.findByUrl(url), is(page));
     }
 
     @Test
-    public void retrievingStoredLinksGivesEmptyPage() throws Exception {
+    public void retrievingStoredUrlsGivesPageWithSameUrl() throws Exception {
         String url = "https://www.google.com";
         pageRepository.store(url);
-        Page page = new Page(url, null, null);
+        Page page = new Page(url, null);
         assertThat(pageRepository.findByUrl(url), is(page));
     }
 
@@ -47,24 +44,24 @@ public class PageRepositoryTest {
     @Test
     public void newlyStoredPageOverritesValueOfOlderPageWithSameUrl() throws Exception {
         String url = "https://www.google.com";
-        Page olderPage = new Page(url, "Old", Collections.emptyList());
+        Page olderPage = new Page(url, "Old");
         pageRepository.store(olderPage);
         assertThat(pageRepository.findByUrl("https://www.google.com"), is(olderPage));
 
-        Page newerPage = new Page(url, "New", Collections.emptyList());
+        Page newerPage = new Page(url, "New");
         pageRepository.store(newerPage);
         assertThat(pageRepository.findByUrl("https://www.google.com"), is(newerPage));
     }
 
     @Test
-    public void newlyStoredLinkOverritesValueOfOlderPageWithSameUrl() throws Exception {
+    public void newlyStoredUrlOverritesValueOfOlderPageWithSameUrl() throws Exception {
         String url = "https://www.google.com";
-        Page olderPage = new Page(url, "Old", Collections.emptyList());
+        Page olderPage = new Page(url, "Old");
         pageRepository.store(olderPage);
         assertThat(pageRepository.findByUrl(url), is(olderPage));
 
         pageRepository.store(url);
-        assertThat(pageRepository.findByUrl(url), not(olderPage));
+        assertThat(pageRepository.findByUrl(url), is(new Page(url, null)));
     }
 
     @Test
@@ -76,7 +73,7 @@ public class PageRepositoryTest {
     @Test
     public void containsUrlOfStoredPage() throws Exception {
         String url = "https://www.google.com";
-        Page page = new Page(url, "Google", Collections.emptyList());
+        Page page = new Page(url, "Google");
         pageRepository.store(page);
         assertThat(pageRepository.contains(url), is(true));
     }

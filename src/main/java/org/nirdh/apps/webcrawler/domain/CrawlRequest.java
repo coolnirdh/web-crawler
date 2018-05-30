@@ -3,10 +3,10 @@ package org.nirdh.apps.webcrawler.domain;
 import lombok.Data;
 
 /**
- * Represents a crawl request that can be filtered by application.
+ * Represents a crawl request that CrawlFrontier spawns.
  */
 @Data
 public class CrawlRequest {
-    private final String referrerUrl;
     private final String urlToCrawl;
+    private final String referrerUrl;
 }

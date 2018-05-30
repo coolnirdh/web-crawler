@@ -29,9 +29,10 @@
 
     <service-activator ref="fetcher" method="fetchFrom" input-channel="discoveredUrls" output-channel="cachedResponses"/>
     <service-activator ref="parser" method="parse" input-channel="cachedResponses" output-channel="pages"/>
+
     <splitter ref="crawlFrontier" method="spawnRequests" input-channel="pages" output-channel="crawlRequests"/>
     <transformer expression="payload.getUrlToCrawl()" input-channel="crawlRequests" output-channel="discoveredUrls"/>
 
-    <logging-channel-adapter order="2" channel="logger"/>
+    <logging-channel-adapter order="2" channel="logger" expression="payload.getUrl() + ' -> ' + payload.getInternalLinks()"/>
 
 </beans:beans>

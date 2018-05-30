@@ -23,7 +23,7 @@ public class PageRepository {
     }
 
     public void store(String url) {
-        pagesByUrl.put(url, new Page(url, null, null));
+        pagesByUrl.put(url, new Page(url, null));
     }
 
     public Page findByUrl(String url) {
