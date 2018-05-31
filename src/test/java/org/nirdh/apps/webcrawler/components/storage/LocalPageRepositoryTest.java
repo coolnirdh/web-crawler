@@ -11,13 +11,13 @@ import static org.hamcrest.Matchers.nullValue;
 /**
  * Created by Nirdh on 24-05-2018.
  */
-public class PageRepositoryTest {
+public class LocalPageRepositoryTest {
 
     private PageRepository pageRepository;
 
     @Before
     public void setUp() throws Exception {
-        pageRepository = new PageRepository();
+        pageRepository = new LocalPageRepository();
     }
 
     @Test

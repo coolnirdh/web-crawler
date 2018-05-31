@@ -2,6 +2,8 @@ package org.nirdh.apps.webcrawler.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nirdh.apps.webcrawler.components.storage.LocalPageRepository;
+import org.nirdh.apps.webcrawler.components.storage.PageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -22,6 +24,11 @@ public class WebCrawlerConfig {
 
     @Value("${concurrency.corePoolSize}")
     private int corePoolSize;
+
+    @Bean
+    public PageRepository pageRepository() {
+        return new LocalPageRepository();
+    }
 
     @Bean
     public TaskExecutor taskExecutor() {
