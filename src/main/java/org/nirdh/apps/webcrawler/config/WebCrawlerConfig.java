@@ -26,11 +26,6 @@ public class WebCrawlerConfig {
     private int corePoolSize;
 
     @Bean
-    public PageRepository pageRepository() {
-        return new LocalPageRepository();
-    }
-
-    @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.setCorePoolSize(corePoolSize);

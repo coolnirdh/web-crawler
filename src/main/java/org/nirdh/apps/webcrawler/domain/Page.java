@@ -1,8 +1,15 @@
 package org.nirdh.apps.webcrawler.domain;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import lombok.Data;
 import org.apache.commons.lang3.Validate;
+import org.springframework.data.elasticsearch.annotations.Document;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,6 +21,8 @@ import java.util.List;
  * such caching is commonly done when working with key-value stores like Cassandra and Gemfire.
  */
 @Data
+@Document(indexName = "pages", type = "page")
+@JsonDeserialize(using = PageDeserializer.class)
 public class Page {
     private final String domain;
     private final String url;
@@ -49,5 +58,30 @@ public class Page {
 
     public List<Link> getExternalLinks() {
         return Collections.unmodifiableList(externalLinks);
+    }
+}
+
+class PageDeserializer extends StdDeserializer<Page> {
+
+    public PageDeserializer() {
+        this(null);
+    }
+
+    public PageDeserializer(Class<?> vc) {
+        super(vc);
+    }
+
+    @Override
+    public Page deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+        JsonNode node = jsonParser.getCodec().readTree(jsonParser);
+        String url = node.get("url").asText();
+        String title = node.get("title").asText();
+        Page page = new Page(url, title);
+        for (JsonNode linkNode : node.get("allLinks")) {
+            url = linkNode.get("url").asText();
+            String text = linkNode.get("text").asText();
+            page.add(new Link(url, text));
+        }
+        return page;
     }
 }

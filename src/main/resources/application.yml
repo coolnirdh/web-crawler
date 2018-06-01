@@ -6,3 +6,9 @@ http:
     idleTimeOutInSeconds: 30
 concurrency:
   corePoolSize: 8
+spring:
+  data:
+    elasticsearch:
+      cluster-name: web-crawler
+      cluster-nodes: 127.0.0.1:9300
+
