@@ -1,9 +1,10 @@
 package org.nirdh.apps.webcrawler.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import lombok.Data;
 import org.apache.commons.lang3.Validate;
@@ -22,7 +23,6 @@ import java.util.List;
  */
 @Data
 @Document(indexName = "pages", type = "page")
-@JsonDeserialize(using = PageDeserializer.class)
 public class Page {
     private final String domain;
     private final String url;
@@ -36,6 +36,15 @@ public class Page {
         this.url = url;
         this.title = title;
         this.domain = URI.create(url).getHost();
+    }
+
+    @JsonCreator
+    public Page(
+            @JsonProperty("url") String url,
+            @JsonProperty("title") String title,
+            @JsonProperty("allLinks") List<Link> allLinks) {
+        this(url, title);
+        allLinks.forEach(this::add);
     }
 
     public void add(Link link) {

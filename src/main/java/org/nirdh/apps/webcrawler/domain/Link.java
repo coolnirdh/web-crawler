@@ -1,5 +1,7 @@
 package org.nirdh.apps.webcrawler.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -17,7 +19,10 @@ public class Link {
     private final String url;
     private final String text;
 
-    public Link(String url, String text) {
+    @JsonCreator
+    public Link(
+            @JsonProperty("url") String url,
+            @JsonProperty("text") String text) {
         Validate.notNull(url, String.format("Url must not be null for link with text: [%s]", text));
         this.url = url.replaceFirst("[?\\/#]+$", "");
         this.text = text;
